@@ -21,14 +21,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug Secrets
-        run: |
-          echo "Client ID length: ${#CLIENT_ID}"
-          echo "Tenant ID length: ${#TENANT_ID}"
-        env:
-          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
       - name: Azure Login
         uses: azure/login@v2
         with:
