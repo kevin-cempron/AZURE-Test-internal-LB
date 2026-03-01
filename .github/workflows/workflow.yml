@@ -43,4 +43,4 @@ jobs:
         run: terraform init
 
       - name: Terraform apply
-        run: terraform apply -var ssh_key_pub="$(cat azure_key.pub)" -auto-approve
+        run: terraform apply -var ssh_pub_key="$(cat azure_key.pub)" -auto-approve

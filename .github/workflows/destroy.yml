@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type DESTROY to confirm'
+        description: 'Type APPLY to confirm'
         required: true
 
 permissions:
@@ -14,11 +14,20 @@ permissions:
 jobs:
   destroy:
     runs-on: ubuntu-latest
+    environment: env-Azure_LB
     if: github.event.inputs.confirm == 'DESTROY'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Debug Secrets
+        run: |
+          echo "Client ID length: ${#CLIENT_ID}"
+          echo "Tenant ID length: ${#TENANT_ID}"
+        env:
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       - name: Azure Login
         uses: azure/login@v2
@@ -33,5 +42,5 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Destroy
-        run: terraform destroy -var ssh_key_pub="$(cat azure_key.pub)" -auto-approve
+      - name: Terraform destroy
+        run: terraform destroy -var ssh_pub_key="$(cat azure_key.pub)" -auto-approve
