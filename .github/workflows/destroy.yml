@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type APPLY to confirm'
+        description: 'Type DESTROY to confirm'
         required: true
 
 permissions:
