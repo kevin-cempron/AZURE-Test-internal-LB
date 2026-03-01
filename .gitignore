@@ -1,0 +1,3 @@
+# Ignore tfstate file#
+*.tfstate
+*.tfstate.*

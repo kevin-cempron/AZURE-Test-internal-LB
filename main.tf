@@ -1,5 +1,6 @@
 provider "azurerm" {
   features {}
+  use_oidc = true
 }
 
 #Resource Group creation which will include all all the resources ##########
@@ -252,10 +253,10 @@ resource "azurerm_lb" "lb_website" {
   location            = azurerm_resource_group.rg-test-internal-lb.location
 
   frontend_ip_configuration {
-    name               = "fip_lb_website"
-    subnet_id          = azurerm_subnet.subnet-test-internal-lb.id
+    name                          = "fip_lb_website"
+    subnet_id                     = azurerm_subnet.subnet-test-internal-lb.id
     private_ip_address_allocation = "Static"
-    private_ip_address = "192.168.50.15"
+    private_ip_address            = "192.168.50.15"
   }
 }
 
@@ -279,7 +280,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "NIC-VM2-t
   backend_address_pool_id = azurerm_lb_backend_address_pool.BEP_lb_website.id
 }
 
-# Creation of the nat rule
+# Creation of the rule of the LB
 
 resource "azurerm_lb_rule" "lb-rule-website" {
   name                           = "lb-rule-Website"
@@ -288,8 +289,8 @@ resource "azurerm_lb_rule" "lb-rule-website" {
   frontend_port                  = 8000
   backend_port                   = 80
   frontend_ip_configuration_name = azurerm_lb.lb_website.frontend_ip_configuration[0].name
-  probe_id = azurerm_lb_probe.Probe-lb-website.id
-  backend_address_pool_ids = [azurerm_lb_backend_address_pool.BEP_lb_website.id]
+  probe_id                       = azurerm_lb_probe.Probe-lb-website.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.BEP_lb_website.id]
 }
 
 resource "azurerm_lb_probe" "Probe-lb-website" {
@@ -299,3 +300,30 @@ resource "azurerm_lb_probe" "Probe-lb-website" {
   protocol        = "Http"
   request_path    = "/"
 }
+
+###### CREATION OF PRIVATE DNS ZONE on in independant VNET
+
+resource "azurerm_private_dns_zone" "private-dns-zone" {
+  name                = "umbrella-corp.com"
+  resource_group_name = azurerm_resource_group.rg-test-internal-lb.name
+}
+
+
+resource "azurerm_private_dns_zone_virtual_network_link" "link_dns_lb" {
+  name                  = "link_dns_lb"
+  resource_group_name   = azurerm_resource_group.rg-test-internal-lb.name
+  private_dns_zone_name = azurerm_private_dns_zone.private-dns-zone.name
+  virtual_network_id    = azurerm_virtual_network.vnet-test-internal-lb.id
+}
+
+
+resource "azurerm_private_dns_a_record" "example" {
+  name                = "website"
+  zone_name           = azurerm_private_dns_zone.private-dns-zone.name
+  resource_group_name = azurerm_resource_group.rg-test-internal-lb.name
+  ttl                 = 300
+  records             = ["192.168.50.15"]
+}
+
+
+
