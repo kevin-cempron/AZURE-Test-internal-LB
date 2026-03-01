@@ -43,9 +43,7 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        env:
-          TF_CLOUD_ORGANIZATION: ${{ secrets.TF_ORG }}
-          TF_WORKSPACE: ${{ secrets.TF_WORKSPACE }}
+
 
       - name: Terraform destroy
         run: terraform destroy -var ssh_pub_key="$(cat azure_key.pub)" -auto-approve

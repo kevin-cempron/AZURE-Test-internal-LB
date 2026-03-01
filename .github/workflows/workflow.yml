@@ -35,9 +35,6 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        env:
-          TF_CLOUD_ORGANIZATION: ${{ secrets.TF_ORG }}
-          TF_WORKSPACE: ${{ secrets.TF_WORKSPACE }}
 
       - name: Terraform apply
         run: terraform apply -var ssh_pub_key="$(cat azure_key.pub)" -auto-approve
