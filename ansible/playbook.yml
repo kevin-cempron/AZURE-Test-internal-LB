@@ -1,8 +1,8 @@
 ---
 - name: Having a website with Hello World and using apache2
-  hosts: Website-server
+  hosts: WebsiteServer
   become: yes
-  remote-user: azureuser
+  remote_user: azureuser
 
 
   tasks:
@@ -10,7 +10,7 @@
       ansible.builtin.apt:
         name: apache2
         state: present
-        
+
     - name: put the index.html
       ansible.builtin.copy:
         src: ../template/index.html
