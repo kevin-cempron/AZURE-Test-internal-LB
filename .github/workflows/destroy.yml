@@ -38,4 +38,4 @@ jobs:
 
 
       - name: Terraform destroy
-        run: terraform destroy -var ssh_pub_key="$(cat azure_key.pub)" -auto-approve
+        run: terraform destroy -auto-approve

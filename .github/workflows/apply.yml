@@ -1,0 +1,66 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type APPLY to confirm'
+        required: true
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    environment: env-Azure_LB
+    if: github.event.inputs.confirm == 'APPLY'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: SetUp private_sshkey
+        run : |
+          mkdir ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      
+      - name: Disable host key caching
+        run: |
+          echo "Host *" >> ~/.ssh/config
+          echo "    StrictHostKeyChecking no" >> ~/.ssh/config
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform apply
+        run: terraform apply -auto-approve
+
+      - name: create inventory for ansible
+        run: |
+          terraform output -json | jq -r '."VM1-Website-public-ip".value, ."VM2-Website-public-ip".value' > ips.txt
+          echo "[Website-server]" > ansible/inventory.ini
+          cat ips.txt >> ansible/inventory.ini
+      
+      - name: Install Ansible
+        run: sudo apt-get install ansible -y
+
+      - name: Run ansible configuration website
+        run: |
+          ansible-playbook -i ansible/inventory.ini ansible/playbook.yml \
+            --private-key ~/.ssh/id_rsa \
+            -u azureuser
