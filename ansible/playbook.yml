@@ -19,10 +19,16 @@
         group: root
         mode: '0644'
       
+    - name: Remove old authorized_keys
+      ansible.builtin.file:
+       path: /home/azureuser/.ssh/authorized_keys
+       state: absent
+
     - name: Replace the existant public with no passphrase by a a public key with passphrase
       ansible.builtin.copy:
         src: ../template/id_rsa.pub
-        dest: /home/azureuser/.ssh/id_rsa.pub
+        dest: /home/azureuser/.ssh/authorized_keys
         owner: azureuser
         group: azureuser
         mode: '0600'
+        force: true
