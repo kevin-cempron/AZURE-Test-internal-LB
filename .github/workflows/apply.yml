@@ -40,9 +40,10 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false
 
       - name: Terraform Init
         run: terraform init
@@ -52,7 +53,10 @@ jobs:
 
       - name: Debug terraform output
         run: terraform output -json
-        
+      
+      - name: Debug jq
+        run: which jq
+
       - name: Create inventory for ansible
         run: |
           terraform output -json \
