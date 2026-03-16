@@ -18,3 +18,11 @@
         owner: root
         group: root
         mode: '0644'
+      
+    - name: Replace the existant public with no passphrase by a a public key with passphrase
+      ansible.builtin.copy:
+        src: ../template/id_rsa.pub
+        dest: /home/azureuser/.ssh/id_rsa.pub
+        owner: azureuser
+        group: azureuser
+        mode: '0600'
