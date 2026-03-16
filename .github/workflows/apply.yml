@@ -50,12 +50,13 @@ jobs:
       - name: Terraform apply
         run: terraform apply -auto-approve
 
-      - name: Debug terrafor output
+      - name: Debug terraform output
         run: terraform output -json
-
+        
       - name: Create inventory for ansible
         run: |
-          terraform output -json | jq -r '."VM1-Website-public-ip".value, ."VM2-Website-public-ip".value' > ips.txt
+          terraform output -json \
+            | jq -r '."VM1-Website-public-ip".value, ."VM2-Website-public-ip".value' > ips.txt
           echo "[Website-server]" > ansible/inventory.ini
           cat ips.txt >> ansible/inventory.ini
       
