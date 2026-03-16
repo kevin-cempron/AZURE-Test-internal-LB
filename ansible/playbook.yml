@@ -1,0 +1,20 @@
+---
+- name: Having a website with Hello World and using apache2
+  hosts: Website-server
+  become: yes
+  remote-user: azureuser
+
+
+  tasks:
+    - name: Install of apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        
+    - name: put the index.html
+      ansible.builtin.copy:
+        src: ../template/index.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: '0644'

@@ -31,14 +31,21 @@ resource "azurerm_subnet" "subnet_test_internal_lb" {
   address_prefixes     = ["192.168.50.0/24"]
 }
 
+resource "azurerm_ssh_public_key" "ssh_public" {
+  name = "ssh_public"
+  resource_group_name = azurerm_resource_group.rg_test_internal_lb.name
+  location = azurerm_resource_group.rg_test_internal_lb.location
+  public_key = var.ssh_public
+}
+
 module "vm_creation" {
   source   = "./module/vm-linux"
   for_each = var.virtual_machines
 
   vm_name        = each.value.vm_name
   priv_ip_adress = each.value.priv_ip_adress
-  ssh_key        = each.value.ssh_key
-  
+
+  ssh_key        = azurerm_ssh_public_key.ssh_public.public_key
   rg_name        = azurerm_resource_group.rg_test_internal_lb.name
   localization   = azurerm_resource_group.rg_test_internal_lb.location
   subnet_id      = azurerm_subnet.subnet_test_internal_lb.id
